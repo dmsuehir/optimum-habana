@@ -1,0 +1,74 @@
+# Default values for examples.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: amr-registry.caas.intel.com/aiops/mlops-ci
+  pullPolicy: Always
+  tag: dmsuehir-gaudi-1.15.1-optimum-habana-examples-1.11.1
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # runAsUser: 0
+  # runAsGroup: 0
+  # fsGroup: 2000
+
+securityContext:
+  privileged: true
+
+command:
+  - python
+  - /workspace/optimum-habana/examples/text-classification/run_glue.py
+  - --model_name_or_path
+  - bert-large-uncased-whole-word-masking
+  - --gaudi_config_name
+  - Habana/bert-large-uncased-whole-word-masking
+  - --task_name
+  - mrpc
+  - --do_train
+  - --do_eval
+  - --per_device_train_batch_size
+  - "32"
+  - --learning_rate
+  - "3e-5"
+  - --num_train_epochs
+  - "3"
+  - --max_seq_length
+  - "128"
+  - --output_dir
+  - ./output/mrpc/
+  - --use_habana
+  - --use_lazy_mode
+  - --use_hpu_graphs_for_inference
+  - --throughput_warmup_steps
+  - "3"
+  - --bf16
+
+envFrom:
+- configMapRef:
+    name: intel-proxy-config
+
+env:
+- name: LOGLEVEL
+  value: info
+
+resources:
+  limits:
+    habana.ai/gaudi: 1
+    cpu: 16
+    memory: 128Gi
+    hugepages-2Mi: 4400Mi
+  requests:
+    habana.ai/gaudi: 1
+    cpu: 16
+    memory: 128Gi
+    hugepages-2Mi: 4400Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
