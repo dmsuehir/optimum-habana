@@ -19,6 +19,28 @@ podSecurityContext: {}
 securityContext:
   privileged: true
 
+envFrom:
+- configMapRef:
+    name: intel-proxy-config
+
+env:
+- name: LOGLEVEL
+  value: info
+
+secret:
+  encodedToken:
+  secretMountPath: /tmp/hf_token
+
+storage:
+  storageClassName: nfs-client
+  accessModes:
+  - "ReadWriteMany"
+  resources:
+    requests:
+      storage: 30Gi
+  pvcMountPath: &pvcMountPath /tmp/pvc-mount
+  deployDataAccessPod: true
+
 command:
   - python
   - /workspace/optimum-habana/examples/text-classification/run_glue.py
@@ -39,21 +61,13 @@ command:
   - --max_seq_length
   - "128"
   - --output_dir
-  - ./output/mrpc/
+  - *pvcMountPath
   - --use_habana
   - --use_lazy_mode
   - --use_hpu_graphs_for_inference
   - --throughput_warmup_steps
   - "3"
   - --bf16
-
-envFrom:
-- configMapRef:
-    name: intel-proxy-config
-
-env:
-- name: LOGLEVEL
-  value: info
 
 resources:
   limits:
