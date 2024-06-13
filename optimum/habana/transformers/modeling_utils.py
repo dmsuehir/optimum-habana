@@ -55,6 +55,7 @@ from .models import (
     GaudiLlamaModel,
     GaudiLlamaRotaryEmbedding,
     GaudiLlavaForConditionalGeneration,
+    GaudiLlavaNextForConditionalGeneration,
     GaudiMistralAttention,
     GaudiMistralDecoderLayer,
     GaudiMistralForCausalLM,
@@ -222,6 +223,8 @@ def adapt_transformers_to_gaudi():
         GaudiGenerationMixin.update_model_kwargs_for_bucketing
     )
     transformers.generation.GenerationMixin._get_hpu_graphs_kwargs = GaudiGenerationMixin._get_hpu_graphs_kwargs
+    transformers.generation.GenerationMixin._pad_past_key_values = GaudiGenerationMixin._pad_past_key_values
+    transformers.generation.GenerationMixin._remove_past_key_values = GaudiGenerationMixin._remove_past_key_values
     transformers.generation.GenerationMixin._expand_inputs_for_generation = staticmethod(
         GaudiGenerationMixin._expand_inputs_for_generation
     )
@@ -360,6 +363,9 @@ def adapt_transformers_to_gaudi():
 
     # Optimization for llava on Gaudi
     transformers.models.llava.modeling_llava.LlavaForConditionalGeneration = GaudiLlavaForConditionalGeneration
+    transformers.models.llava_next.modeling_llava_next.LlavaNextForConditionalGeneration = (
+        GaudiLlavaNextForConditionalGeneration
+    )
 
     # Optimization for Clip on Gaudi
     transformers.models.clip.modeling_clip.CLIPVisionEmbeddings = GaudiCLIPVisionEmbeddings
