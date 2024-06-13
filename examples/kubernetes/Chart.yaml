@@ -1,6 +1,6 @@
 apiVersion: v2
-name: Optimum for Intel® Gaudi® Accelerators
-description: This Helm chart deploys example jobs using Optimum for Intel® Gaudi® Accelerators
+name: Deploy Optimum for Intel® Gaudi® Accelerators Examples to Kubernetes
+description: This Helm chart deploys example jobs using Optimum for Intel® Gaudi® Accelerators to a Kubernetes cluster.
 
 # A chart can be either an 'application' or a 'library' chart.
 #
