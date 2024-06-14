@@ -17,5 +17,5 @@ WORKDIR /workspace
 
 RUN git clone https://github.com/huggingface/optimum-habana.git --single-branch --branch v${OPTIMUM_HABANA_VER}
 
-RUN pip install -r optimum-habana/examples/language-modeling/requirements.txt && \
-    pip install -r optimum-habana/examples/text-classification/requirements.txt
+COPY requirements.txt .
+RUN pip install -r requirements.txt
