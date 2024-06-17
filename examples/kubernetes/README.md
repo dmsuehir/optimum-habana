@@ -89,11 +89,11 @@ name and tag of your Docker image, the number of HPU cards to use for the job, e
 | nodeSelector | object | `{}` | Optionally specify a [node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) with labels the determine which node your worker pod will land on |
 | podAnnotations | object | `{}` | Pod [annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to attach metadata to the job |
 | podSecurityContext | object | `{}` | Specify a pod security context to run as a non-root user |
-| resources.limits."habana.ai/gaudi" | int | `1` |  |
+| resources.limits."habana.ai/gaudi" | int | `1` | Specify the number of Gaudi card(s) |
 | resources.limits.cpu | int | `16` | Specify [CPU resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu) limits for the job |
 | resources.limits.hugepages-2Mi | string | `"4400Mi"` | Specify hugepages-2Mi requests for the job |
 | resources.limits.memory | string | `"128Gi"` | Specify [Memory limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) requests for the job |
-| resources.requests."habana.ai/gaudi" | int | `1` |  |
+| resources.requests."habana.ai/gaudi" | int | `1` | Specify the number of Gaudi card(s) |
 | resources.requests.cpu | int | `16` | Specify [CPU resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu) requests for the job |
 | resources.requests.hugepages-2Mi | string | `"4400Mi"` | Specify hugepages-2Mi requests for the job |
 | resources.requests.memory | string | `"128Gi"` | Specify [Memory resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) requests for the job |

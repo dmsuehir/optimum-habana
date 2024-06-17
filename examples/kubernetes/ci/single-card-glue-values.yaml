@@ -6,9 +6,9 @@ image:
   # -- Determines when the kubelet will pull the image to the worker nodes. Choose from: `IfNotPresent`, `Always`, or `Never`. If updates to the image have been made, use `Always` to ensure the newest image is used.
   pullPolicy: IfNotPresent
   # -- Repository and name of the docker image
-  repository: 
+  repository: amr-registry.caas.intel.com/aiops/mlops-ci
   # -- Tag of the docker image
-  tag: 
+  tag: dmsuehir-gaudi-1.15.1-optimum-habana-examples-1.11.1
 
 imagePullSecrets: []
 
@@ -58,8 +58,7 @@ storage:
 
 resources:
   limits:
-    # -- Specify the number of Gaudi card(s)
-    habana.ai/gaudi: &hpus 1
+    habana.ai/gaudi: 1
     # -- Specify [CPU resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu) limits for the job
     cpu: 16
     # -- Specify [Memory limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) requests for the job
@@ -67,7 +66,6 @@ resources:
     # -- Specify hugepages-2Mi requests for the job
     hugepages-2Mi: 4400Mi
   requests:
-    # -- Specify the number of Gaudi card(s)
     habana.ai/gaudi: *hpus
     # -- Specify [CPU resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu) requests for the job
     cpu: 16
@@ -77,7 +75,33 @@ resources:
     hugepages-2Mi: 4400Mi
 
 # Define the command to run in the container
-command: []
+command:
+  - python
+  - /workspace/optimum-habana/examples/text-classification/run_glue.py
+  - --model_name_or_path
+  - bert-large-uncased-whole-word-masking
+  - --gaudi_config_name
+  - Habana/bert-large-uncased-whole-word-masking
+  - --task_name
+  - mrpc
+  - --do_train
+  - --do_eval
+  - --per_device_train_batch_size
+  - "32"
+  - --learning_rate
+  - "3e-5"
+  - --num_train_epochs
+  - "3"
+  - --max_seq_length
+  - "128"
+  - --output_dir
+  - *pvcMountPath
+  - --use_habana
+  - --use_lazy_mode
+  - --use_hpu_graphs_for_inference
+  - --throughput_warmup_steps
+  - "3"
+  - --bf16
 
 # -- Optionally specify a [node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) with labels the determine which node your worker pod will land on
 nodeSelector: {}
