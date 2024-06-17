@@ -95,7 +95,7 @@ command:
   - --num_train_epochs
   - "3"
   - --per_device_train_batch_size
-  - "16"
+  - "12"
   - --evaluation_strategy
   - "no" 
   - --save_strategy
