@@ -58,21 +58,23 @@ storage:
 
 resources:
   limits:
-    habana.ai/gaudi: &hpus "8"
+    # -- Specify the number of Gaudi card(s)
+    habana.ai/gaudi: &hpus "2"
     # -- Specify [CPU resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu) limits for the job
-    cpu: 128
+    cpu: 16
     # -- Specify [Memory limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) requests for the job
-    memory: 512Gi
+    memory: 128Gi
     # -- Specify hugepages-2Mi requests for the job
-    hugepages-2Mi: 35202Mi
+    hugepages-2Mi: 4400Mi
   requests:
+    # -- Specify the number of Gaudi card(s)
     habana.ai/gaudi: *hpus
     # -- Specify [CPU resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu) requests for the job
-    cpu: 128
+    cpu: 16
     # -- Specify [Memory resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) requests for the job
-    memory: 512Gi
+    memory: 128Gi
     # -- Specify hugepages-2Mi requests for the job
-    hugepages-2Mi: 35202Mi
+    hugepages-2Mi: 4400Mi
 
 # Define the command to run in the container
 command:
