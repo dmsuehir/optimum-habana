@@ -126,8 +126,8 @@ Validated use cases can be found in the `ci` directory:
 |-------------------|------|-------------|
 | [`ci/single-card-glue-values.yaml`](ci/single-card-glue-values.yaml) | 1 | Uses a single card to [fine tune BERT large](../text-classification/README.md#single-card-training) (with whole word masking) on the text classification MRPC task using `run_glue.py`.
 | [`ci/multi-card-glue-values.yaml`](ci/multi-card-glue-values.yaml) | 2 | Uses 2 HPUs with the [`gaudi_spawn.py`](../gaudi_spawn.py) script to [fine tune BERT large](../text-classification/README.md#multi-card-training) (with whole word masking) on the text classification MRPC task using `run_glue.py`.
-| [`ci/single-card-lora-clm-values.yaml`](ci/single-card-lora-clm-values.yaml) | 1 | Uses a single card to [fine tune Llama1-7B](../language-modeling/README.md#loraadaloraia3) with LoRA using the `run_lora_clm.py` script.
-| [`ci/multi-card-lora-clm-values.yaml`](ci/multi-card-lora-clm-values.yaml) | 8 | Uses 8 HPUs with the [`gaudi_spawn.py`](../gaudi_spawn.py) script to [fine tune Llama1-7B](../language-modeling/README.md#loraadaloraia3) with LoRA using the `run_lora_clm.py` script.
+| [`ci/single-card-lora-clm-values.yaml`](ci/single-card-lora-clm-values.yaml) | 1 | Uses a single card to [fine tune Llama1-7B](../language-modeling/README.md#peft) with LoRA using the `run_lora_clm.py` script.
+| [`ci/multi-card-lora-clm-values.yaml`](ci/multi-card-lora-clm-values.yaml) | 8 | Uses 8 HPUs with the [`gaudi_spawn.py`](../gaudi_spawn.py) script to [fine tune Llama1-7B](../language-modeling/README.md#peft) with LoRA using the `run_lora_clm.py` script.
 
 ### Deploy job to the cluster
 
