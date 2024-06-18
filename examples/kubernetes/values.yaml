@@ -10,6 +10,7 @@ image:
   # -- Tag of the docker image
   tag: 
 
+# -- Optional [image pull secret](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to pull from a private registry
 imagePullSecrets: []
 
 # -- Pod [annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to attach metadata to the job
@@ -25,15 +26,16 @@ securityContext:
   # -- Run as privileged or unprivileged
   privileged: true
 
+# -- The default 64MB of shared memory for docker containers can be insufficient when using more than one HPU. Setting hostIPC: true allows reusing the host's shared memory space inside the container.
+hostIPC: false
+
 # -- Define a config map's data as container environment variables
-envFrom:
-- configMapRef:
-    name: intel-proxy-config
+envFrom: []
 
 # -- Define environment variables to set in the container
 env:
 - name: LOGLEVEL
-  value: info
+  value: INFO
 
 secret:
   # -- Hugging Face token encoded using base64.
@@ -51,9 +53,9 @@ storage:
   resources:
     requests:
       storage: 30Gi
-  # -- Locaton where the PVC will be mounted in the pods
+  # -- Locaton where the PVC will be mounted in the pod
   pvcMountPath: &pvcMountPath /tmp/pvc-mount
-  # -- A data access pod will be deployed when set to true
+  # -- A data access pod will be deployed when set to true. This allows accessing the data from the PVC after the worker pod has completed.
   deployDataAccessPod: true
 
 resources:
@@ -62,28 +64,31 @@ resources:
     habana.ai/gaudi: &hpus 1
     # -- Specify [CPU resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu) limits for the job
     cpu: 16
-    # -- Specify [Memory limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) requests for the job
+    # -- Specify [memory limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) requests for the job
     memory: 128Gi
-    # -- Specify hugepages-2Mi requests for the job
+    # -- Specify hugepages-2Mi limit for the job
     hugepages-2Mi: 4400Mi
   requests:
     # -- Specify the number of Gaudi card(s)
     habana.ai/gaudi: *hpus
     # -- Specify [CPU resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu) requests for the job
     cpu: 16
-    # -- Specify [Memory resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) requests for the job
+    # -- Specify [memory resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) requests for the job
     memory: 128Gi
     # -- Specify hugepages-2Mi requests for the job
     hugepages-2Mi: 4400Mi
 
 # Define the command to run in the container
-command: []
+command:
+  - python
+  - /workspace/optimum-habana/examples/gaudi_spawn.py
+  - --help
 
-# -- Optionally specify a [node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) with labels the determine which node your worker pod will land on
+# -- Optionally specify a [node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) with labels the determine which node your worker pod will land on.
 nodeSelector: {}
 
 # -- Optionally specify [tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) to allow the worker pod to land on a node with a taint.
 tolerations: []
 
-# -- Optionally provide node [affinities](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) to constrain which node your worker pod will be scheduled on
+# -- Optionally provide node [affinities](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) to constrain which node your worker pod will be scheduled on.
 affinity: {}

@@ -3,7 +3,7 @@
 {{ template "chart.badgesSection" . }}
 
 This folder contains a Dockerfile and [Helm chart](https://helm.sh) demonstrating how to run 🤗 Optimum Habana examples
-can be run using nodes with Intel® Gaudi® AI accelerator from a vanilla Kubernetes cluster. The instructions below
+can be run using Intel® Gaudi® AI accelerator nodes from a vanilla Kubernetes cluster. The instructions below
 explain how to build the docker image and deploy the job to a Kubernetes cluster using Helm.
 
 ## Requirements
@@ -31,15 +31,9 @@ The [Dockerfile](Dockerfile) and [docker-compose.yaml](docker-compose.yaml) buil
 * A `optimum-habana-examples` image is built on top of the `optimum-habana` base to includes installations from
 `requirements.txt` files in the example directories and a clone of [this GitHub repository](https://github.com/huggingface/optimum-habana/) in order to run example scripts.
 
-To build the containers, clone this repository, and then use the following commands:
+Use the the following commands to build the containers:
 
 ```bash
-cd examples/kubernetes
-
-# Set variables for your container registry and repository
-export REGISTRY=<Your container registry>
-export REPO=<Your container repository>
-
 # Specify the base image name/tag
 export BASE_IMAGE_NAME=vault.habana.ai/gaudi-docker/1.15.1/ubuntu22.04/habanalabs/pytorch-installer-2.2.0
 export BASE_IMAGE_TAG=latest
@@ -48,12 +42,21 @@ export BASE_IMAGE_TAG=latest
 export GAUDI_SW_VER=1.15.1
 export OPTIMUM_HABANA_VER=1.11.1
 
+git clone https://github.com/huggingface/optimum-habana.git --single-branch --branch v${OPTIMUM_HABANA_VER}
+
+# Note: Modify the requirements.txt file in the kubernetes directory for the specific example(s) that you want to run
+cd optimum-habana/examples/kubernetes
+
+# Set variables for your container registry and repository
+export REGISTRY=<Your container registry>
+export REPO=<Your container repository>
+
 # Build the images
 docker compose build
-```
 
-After the build has completed, push the `optimum-habana-examples` image to your registry so that it can be pulled from
-the Kubernetes cluster.
+# Push the optimum-habana-examples image to a container registry
+docker push <image name>:<tag>
+```
 
 ## Helm Chart
 
@@ -62,16 +65,16 @@ the Kubernetes cluster.
 This Kubernetes job uses a [Helm chart](https://helm.sh) with the following resources:
 * Job to run the Optimum Habana example script using HPU(s)
 * [Persistant volume claim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims)
-  (PVC) backed by NFS for output files
-* (Optional) Pod to access the PVC files after the example script completes
+  (PVC) backed by NFS to store output files
+* (Optional) Pod used to access the files from the PVC after the worker pod completes
 * (Optional) [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) for a Hugging Face token, if gated
   models are being used
 
 ### Helm chart values
 
 The [Helm chart values file](https://helm.sh/docs/chart_template_guide/values_files/) is a yaml file with values that
-get passed to the chart when it's deployed to the cluster. These values specify the parameters for your job, the
-name and tag of your Docker image, the number of HPU cards to use for the job, etc.
+get passed to the chart when it's deployed to the cluster. These values specify the python script and parameters for
+your job, the name and tag of your Docker image, the number of HPU cards to use for the job, etc.
 
 <details>
   <summary> Expand to see the values table </summary>

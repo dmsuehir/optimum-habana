@@ -3,7 +3,7 @@
 ![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.11.1](https://img.shields.io/badge/AppVersion-1.11.1-informational?style=flat-square)
 
 This folder contains a Dockerfile and [Helm chart](https://helm.sh) demonstrating how to run 🤗 Optimum Habana examples
-can be run using nodes with Intel® Gaudi® AI accelerator from a vanilla Kubernetes cluster. The instructions below
+can be run using Intel® Gaudi® AI accelerator nodes from a vanilla Kubernetes cluster. The instructions below
 explain how to build the docker image and deploy the job to a Kubernetes cluster using Helm.
 
 ## Requirements
@@ -31,15 +31,9 @@ The [Dockerfile](Dockerfile) and [docker-compose.yaml](docker-compose.yaml) buil
 * A `optimum-habana-examples` image is built on top of the `optimum-habana` base to includes installations from
 `requirements.txt` files in the example directories and a clone of [this GitHub repository](https://github.com/huggingface/optimum-habana/) in order to run example scripts.
 
-To build the containers, clone this repository, and then use the following commands:
+Use the the following commands to build the containers:
 
 ```bash
-cd examples/kubernetes
-
-# Set variables for your container registry and repository
-export REGISTRY=<Your container registry>
-export REPO=<Your container repository>
-
 # Specify the base image name/tag
 export BASE_IMAGE_NAME=vault.habana.ai/gaudi-docker/1.15.1/ubuntu22.04/habanalabs/pytorch-installer-2.2.0
 export BASE_IMAGE_TAG=latest
@@ -48,12 +42,21 @@ export BASE_IMAGE_TAG=latest
 export GAUDI_SW_VER=1.15.1
 export OPTIMUM_HABANA_VER=1.11.1
 
+git clone https://github.com/huggingface/optimum-habana.git --single-branch --branch v${OPTIMUM_HABANA_VER}
+
+# Note: Modify the requirements.txt file in the kubernetes directory for the specific example(s) that you want to run
+cd optimum-habana/examples/kubernetes
+
+# Set variables for your container registry and repository
+export REGISTRY=<Your container registry>
+export REPO=<Your container repository>
+
 # Build the images
 docker compose build
-```
 
-After the build has completed, push the `optimum-habana-examples` image to your registry so that it can be pulled from
-the Kubernetes cluster.
+# Push the optimum-habana-examples image to a container registry
+docker push <image name>:<tag>
+```
 
 ## Helm Chart
 
@@ -62,47 +65,50 @@ the Kubernetes cluster.
 This Kubernetes job uses a [Helm chart](https://helm.sh) with the following resources:
 * Job to run the Optimum Habana example script using HPU(s)
 * [Persistant volume claim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims)
-  (PVC) backed by NFS for output files
-* (Optional) Pod to access the PVC files after the example script completes
+  (PVC) backed by NFS to store output files
+* (Optional) Pod used to access the files from the PVC after the worker pod completes
 * (Optional) [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) for a Hugging Face token, if gated
   models are being used
 
 ### Helm chart values
 
 The [Helm chart values file](https://helm.sh/docs/chart_template_guide/values_files/) is a yaml file with values that
-get passed to the chart when it's deployed to the cluster. These values specify the parameters for your job, the
-name and tag of your Docker image, the number of HPU cards to use for the job, etc.
+get passed to the chart when it's deployed to the cluster. These values specify the python script and parameters for
+your job, the name and tag of your Docker image, the number of HPU cards to use for the job, etc.
 
 <details>
   <summary> Expand to see the values table </summary>
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| affinity | object | `{}` | Optionally provide node [affinities](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) to constrain which node your worker pod will be scheduled on |
-| command | list | `[]` |  |
-| env | list | `[{"name":"LOGLEVEL","value":"info"}]` | Define environment variables to set in the container |
-| envFrom | list | `[{"configMapRef":{"name":"intel-proxy-config"}}]` | Define a config map's data as container environment variables |
+| affinity | object | `{}` | Optionally provide node [affinities](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) to constrain which node your worker pod will be scheduled on. |
+| command[0] | string | `"python"` |  |
+| command[1] | string | `"/workspace/optimum-habana/examples/gaudi_spawn.py"` |  |
+| command[2] | string | `"--help"` |  |
+| env | list | `[{"name":"LOGLEVEL","value":"INFO"}]` | Define environment variables to set in the container |
+| envFrom | list | `[]` | Define a config map's data as container environment variables |
+| hostIPC | bool | `false` | The default 64MB of shared memory for docker containers can be insufficient when using more than one HPU. Setting hostIPC: true allows reusing the host's shared memory space inside the container. |
 | image.pullPolicy | string | `"IfNotPresent"` | Determines when the kubelet will pull the image to the worker nodes. Choose from: `IfNotPresent`, `Always`, or `Never`. If updates to the image have been made, use `Always` to ensure the newest image is used. |
 | image.repository | string | `nil` | Repository and name of the docker image |
 | image.tag | string | `nil` | Tag of the docker image |
-| imagePullSecrets | list | `[]` |  |
-| nodeSelector | object | `{}` | Optionally specify a [node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) with labels the determine which node your worker pod will land on |
+| imagePullSecrets | list | `[]` | Optional [image pull secret](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to pull from a private registry |
+| nodeSelector | object | `{}` | Optionally specify a [node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) with labels the determine which node your worker pod will land on. |
 | podAnnotations | object | `{}` | Pod [annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to attach metadata to the job |
 | podSecurityContext | object | `{}` | Specify a pod security context to run as a non-root user |
 | resources.limits."habana.ai/gaudi" | int | `1` | Specify the number of Gaudi card(s) |
 | resources.limits.cpu | int | `16` | Specify [CPU resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu) limits for the job |
-| resources.limits.hugepages-2Mi | string | `"4400Mi"` | Specify hugepages-2Mi requests for the job |
-| resources.limits.memory | string | `"128Gi"` | Specify [Memory limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) requests for the job |
+| resources.limits.hugepages-2Mi | string | `"4400Mi"` | Specify hugepages-2Mi limit for the job |
+| resources.limits.memory | string | `"128Gi"` | Specify [memory limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) requests for the job |
 | resources.requests."habana.ai/gaudi" | int | `1` | Specify the number of Gaudi card(s) |
 | resources.requests.cpu | int | `16` | Specify [CPU resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu) requests for the job |
 | resources.requests.hugepages-2Mi | string | `"4400Mi"` | Specify hugepages-2Mi requests for the job |
-| resources.requests.memory | string | `"128Gi"` | Specify [Memory resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) requests for the job |
+| resources.requests.memory | string | `"128Gi"` | Specify [memory resource](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory) requests for the job |
 | secret.encodedToken | string | `nil` | Hugging Face token encoded using base64. |
 | secret.secretMountPath | string | `"/tmp/hf_token"` | If a token is provided, specify a mount path that will be used to set HF_TOKEN_PATH |
 | securityContext.privileged | bool | `true` | Run as privileged or unprivileged |
 | storage.accessModes | list | `["ReadWriteMany"]` | [Access modes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes) for the persistent volume. |
-| storage.deployDataAccessPod | bool | `true` | A data access pod will be deployed when set to true |
-| storage.pvcMountPath | string | `"/tmp/pvc-mount"` | Locaton where the PVC will be mounted in the pods |
+| storage.deployDataAccessPod | bool | `true` | A data access pod will be deployed when set to true. This allows accessing the data from the PVC after the worker pod has completed. |
+| storage.pvcMountPath | string | `"/tmp/pvc-mount"` | Locaton where the PVC will be mounted in the pod |
 | storage.resources | object | `{"requests":{"storage":"30Gi"}}` | Storage [resources](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#resources) |
 | storage.storageClassName | string | `"nfs-client"` | Name of the storage class to use for the persistent volume claim. To list the available storage classes use: `kubectl get storageclass`. |
 | tolerations | list | `[]` | Optionally specify [tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) to allow the worker pod to land on a node with a taint. |

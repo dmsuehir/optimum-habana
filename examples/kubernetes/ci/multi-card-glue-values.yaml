@@ -25,6 +25,9 @@ securityContext:
   # -- Run as privileged or unprivileged
   privileged: true
 
+# -- The default 64MB of shared memory for docker containers can be insufficient when using more than one HPU. Setting hostIPC: true allows reusing the host's shared memory space inside the container.
+hostIPC: true
+
 # -- Define a config map's data as container environment variables
 envFrom:
 - configMapRef:
@@ -33,7 +36,7 @@ envFrom:
 # -- Define environment variables to set in the container
 env:
 - name: LOGLEVEL
-  value: info
+  value: INFO
 
 secret:
   # -- Hugging Face token encoded using base64.
