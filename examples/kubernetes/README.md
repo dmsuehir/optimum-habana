@@ -120,7 +120,7 @@ example script. Ensure that your container has the requirements needed to run th
 `values.yaml` file with your `image.repository` and `image.tag`. Then, update the `command` array with the script and
 parameters to run the example.
 
-Sample values files can be found for the following use cases:
+Validated use cases can be found in the `ci` directory:
 
 | Values files path | HPUs | Description |
 |-------------------|------|-------------|
