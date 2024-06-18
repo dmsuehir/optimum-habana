@@ -86,7 +86,7 @@ your job, the name and tag of your Docker image, the number of HPU cards to use 
 | command[1] | string | `"/workspace/optimum-habana/examples/gaudi_spawn.py"` |  |
 | command[2] | string | `"--help"` |  |
 | env | list | `[{"name":"LOGLEVEL","value":"INFO"}]` | Define environment variables to set in the container |
-| envFrom | list | `[]` | Define a config map's data as container environment variables |
+| envFrom | list | `[]` | Optionally define a config map's data as container environment variables |
 | hostIPC | bool | `false` | The default 64MB of shared memory for docker containers can be insufficient when using more than one HPU. Setting hostIPC: true allows reusing the host's shared memory space inside the container. |
 | image.pullPolicy | string | `"IfNotPresent"` | Determines when the kubelet will pull the image to the worker nodes. Choose from: `IfNotPresent`, `Always`, or `Never`. If updates to the image have been made, use `Always` to ensure the newest image is used. |
 | image.repository | string | `nil` | Repository and name of the docker image |

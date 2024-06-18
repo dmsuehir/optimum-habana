@@ -6,9 +6,9 @@ image:
   # -- Determines when the kubelet will pull the image to the worker nodes. Choose from: `IfNotPresent`, `Always`, or `Never`. If updates to the image have been made, use `Always` to ensure the newest image is used.
   pullPolicy: IfNotPresent
   # -- Repository and name of the docker image
-  repository: amr-registry.caas.intel.com/aiops/mlops-ci
+  repository: 
   # -- Tag of the docker image
-  tag: dmsuehir-gaudi-1.15.1-optimum-habana-examples-1.11.1
+  tag: 
 
 imagePullSecrets: []
 
@@ -29,9 +29,7 @@ securityContext:
 hostIPC: true
 
 # -- Define a config map's data as container environment variables
-envFrom:
-- configMapRef:
-    name: intel-proxy-config
+envFrom: []
 
 # -- Define environment variables to set in the container
 env:

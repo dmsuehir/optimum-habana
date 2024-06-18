@@ -29,7 +29,7 @@ securityContext:
 # -- The default 64MB of shared memory for docker containers can be insufficient when using more than one HPU. Setting hostIPC: true allows reusing the host's shared memory space inside the container.
 hostIPC: false
 
-# -- Define a config map's data as container environment variables
+# -- Optionally define a config map's data as container environment variables
 envFrom: []
 
 # -- Define environment variables to set in the container
