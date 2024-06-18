@@ -115,6 +115,20 @@ your job, the name and tag of your Docker image, the number of HPU cards to use 
 
 </details>
 
+There is a [`values.yaml` files](values.yaml) that is intended to be used as a template to run an optimum-habana
+example script. Ensure that your container has the requirements needed to run the example, and then update the
+`values.yaml` file with your `image.repository` and `image.tag`. Then, update the `command` array with the script and
+parameters to run the example.
+
+Sample values files can be found for the following use cases:
+
+| Values files path | HPUs | Description |
+|-------------------|------|-------------|
+| [`ci/single-card-glue-values.yaml`](ci/single-card-glue-values.yaml) | 1 | Uses a single card to [fine tune BERT large](../text-classification/README.md#single-card-training) (with whole word masking) on the text classification MRPC task using `run_glue.py`.
+| [`ci/multi-card-glue-values.yaml`](ci/multi-card-glue-values.yaml) | 2 | Uses 2 HPUs with the [`gaudi_spawn.py`](../gaudi_spawn.py) script to [fine tune BERT large](../text-classification/README.md#multi-card-training) (with whole word masking) on the text classification MRPC task using `run_glue.py`.
+| [`ci/single-card-lora-clm-values.yaml`](ci/single-card-lora-clm-values.yaml) | 1 | Uses a single card to [fine tune Llama1-7B](../language-modeling/README.md#loraadaloraia3) with LoRA using the `run_lora_clm.py` script.
+| [`ci/multi-card-lora-clm-values.yaml`](ci/multi-card-lora-clm-values.yaml) | 8 | Uses 8 HPUs with the [`gaudi_spawn.py`](../gaudi_spawn.py) script to [fine tune Llama1-7B](../language-modeling/README.md#loraadaloraia3) with LoRA using the `run_lora_clm.py` script.
+
 ### Deploy job to the cluster
 
 After updating the values file for the example that you want to run, use the following command to deploy the job to
