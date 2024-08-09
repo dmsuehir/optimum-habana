@@ -55,6 +55,7 @@ def parse_args():
     parser.add_argument("--hostfile", type=str, default=None, help="Path to the file where hosts are specified.")
     parser.add_argument("--use_mpi", action="store_true", help="Use MPI for distributed training")
     parser.add_argument("--use_deepspeed", action="store_true", help="Use DeepSpeed for distributed training")
+    parser.add_argument("--master_addr", type=str, default="localhost", help="Master addr used by MPI")
     parser.add_argument("--master_port", type=int, default=29500, help="Master port used by DeepSpeed and MPI")
 
     # positional
@@ -99,6 +100,7 @@ def main():
         hostfile=args.hostfile,
         use_mpi=args.use_mpi,
         use_deepspeed=args.use_deepspeed,
+        master_addr=args.master_addr,
         master_port=args.master_port,
     )
 

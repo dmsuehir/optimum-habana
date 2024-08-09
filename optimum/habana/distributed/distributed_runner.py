@@ -41,6 +41,7 @@ class DistributedRunner:
         hostfile: Union[str, Path] = None,
         use_mpi: bool = False,
         use_deepspeed: bool = False,
+        master_addr: str = "localhost",
         master_port: int = 29500,
         use_env: bool = False,
         map_by: bool = "socket",
@@ -69,6 +70,7 @@ class DistributedRunner:
         self._world_size = world_size
         self._hostfile = hostfile
         self._map_by = map_by
+        self._master_addr = master_addr
         self._master_port = master_port
         self._use_env = use_env
         self._interpreter = f"{sys.executable} "
@@ -100,7 +102,7 @@ class DistributedRunner:
                 self.create_single_node_setup_deepspeed()
             elif use_mpi:
                 # Single-node multi-card run with MPI
-                self._model_env_vars["MASTER_ADDR"] = "localhost"
+                self._model_env_vars["MASTER_ADDR"] = self._master_addr
                 self._model_env_vars["MASTER_PORT"] = self._master_port
                 self.create_single_node_setup_mpirun()
             else:
